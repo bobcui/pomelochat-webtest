@@ -1,7 +1,7 @@
 {
-	"name": "chatofpomelo",
+	"name": "huomaotv-pomelochat-webtest",
 	"version": "0.0.1",
-	"private": false,
+	"private": true,
 	"dependencies": {
 		"express": "3.4.0"
 	}

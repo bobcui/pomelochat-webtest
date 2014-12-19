@@ -129,7 +129,7 @@ function lookupConnector(uid, callback) {
 				showError('error: ' + res.code);
 				return;
 			}
-			callback(res.host, res.port, res.token);
+			callback(res.host, res.port);
 		});
 	});
 };
@@ -153,28 +153,29 @@ $(document).ready(function() {
 	$("#login").click(function() {
 		userId = $("#input_userId").attr("value");
 		channelId = $('#input_channelId').attr("value");
+        token = $('#input_token').attr("value");
 
 		//query entry of connection
-		lookupConnector(userId, function(host, port, token) {
+		lookupConnector(userId, function(host, port) {
 			pomelo.init({
 				host: host,
 				port: port,
 				log: true
 			}, function() {
 				pomelo.request("connector.connectorHandler.login", {
-    					userId: userId,
-    					channelId: channelId,
-                        token: token
-				    }, 
-                    function(res) {
-    					if (res.code != 0) {
-    						showError('error: ' + res.code);
-    						return;
-    					}
+					userId: userId,
+					channelId: channelId,
+                    token: token
+				}, 
+                function(res) {
+					if (res.code != 0) {
+						showError('error: ' + res.code);
+						return;
+					}
 
-    					setId();
-                        setChannelId();
-    					showChat();
+					setId();
+                    setChannelId();
+					showChat();
                 });
 			});
 		});
