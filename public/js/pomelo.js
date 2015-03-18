@@ -399,26 +399,12 @@ require.register("NetEase-pomelo-protocol/lib/protocol.js", function(exports, re
    * socketio current support string
    */
   Protocol.strencode = function(str) {
-    var byteArray = new ByteArray(str.length * 3);
-    var offset = 0;
-    for(var i = 0; i < str.length; i++){
-      var charCode = str.charCodeAt(i);
-      var codes = null;
-      if(charCode <= 0x7f){
-        codes = [charCode];
-      }else if(charCode <= 0x7ff){
-        codes = [0xc0|(charCode>>6), 0x80|(charCode & 0x3f)];
-      }else{
-        codes = [0xe0|(charCode>>12), 0x80|((charCode & 0xfc0)>>6), 0x80|(charCode & 0x3f)];
-      }
-      for(var j = 0; j < codes.length; j++){
-        byteArray[offset] = codes[j];
-        ++offset;
-      }
+    var utf8Str = utf8.encode(str)
+    var buf = new ByteArray(utf8Str.length);
+    for (var i=0, strLen=utf8Str.length; i<strLen; i++) {
+      buf[i] = utf8Str.charCodeAt(i);
     }
-    var _buffer = new ByteArray(offset);
-    copyArray(_buffer, 0, byteArray, 0, offset);
-    return _buffer;
+    return buf;
   };
 
   /**
@@ -427,25 +413,7 @@ require.register("NetEase-pomelo-protocol/lib/protocol.js", function(exports, re
    * return Message Object
    */
   Protocol.strdecode = function(buffer) {
-    var bytes = new ByteArray(buffer);
-    var array = [];
-    var offset = 0;
-    var charCode = 0;
-    var end = bytes.length;
-    while(offset < end){
-      if(bytes[offset] < 128){
-        charCode = bytes[offset];
-        offset += 1;
-      }else if(bytes[offset] < 224){
-        charCode = ((bytes[offset] & 0x3f)<<6) + (bytes[offset+1] & 0x3f);
-        offset += 2;
-      }else{
-        charCode = ((bytes[offset] & 0x0f)<<12) + ((bytes[offset+1] & 0x3f)<<6) + (bytes[offset+2] & 0x3f);
-        offset += 3;
-      }
-      array.push(charCode);
-    }
-    return String.fromCharCode.apply(null, array);
+    return utf8.decode(String.fromCharCode.apply(null, new ByteArray(buffer)))
   };
 
   /**
@@ -1646,12 +1614,12 @@ require.register("pomelonode-pomelo-jsclient-websocket/lib/pomelo-client.js", fu
 
       route = msg.route = abbrs[route];
     }
+
     if(!!protos[route]){
       return protobuf.decode(route, msg.body);
     }else{
       return JSON.parse(Protocol.strdecode(msg.body));
     }
-
     return msg;
   };
 

@@ -168,11 +168,11 @@ $(document).ready(function() {
                     token: token
 				}, 
                 function(res) {
+                    console.log(res)
 					if (res.code != 0) {
 						showError('error: ' + res.code);
 						return;
 					}
-
 					setId();
                     setChannelId();
 					showChat();
